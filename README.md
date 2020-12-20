@@ -153,6 +153,22 @@ public run(): void
 
 ------
 
+暂停
+
+```typescript
+public pause(): void
+```
+
+------
+
+是否正在运行
+
+```typescript
+public isRunning(): boolean
+```
+
+------
+
 设置立绘在canvas上的缩放大小和偏置
 
 ```typescript

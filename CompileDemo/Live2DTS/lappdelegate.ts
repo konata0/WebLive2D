@@ -164,10 +164,22 @@ export class LAppDelegate {
    * 実行処理。
    */
   public run(): void {
+
+    if(this._run){
+      return;
+    }
+
+    // 设置为播放
+    this._run = true;
     // メインループ
     const loop = (): void => {
       // インスタンスの有無の確認
       if (s_instance == null) {
+        return;
+      }
+
+      // 暂停直接退出Loop
+      if(this._run === false){
         return;
       }
 
@@ -200,6 +212,15 @@ export class LAppDelegate {
       requestAnimationFrame(loop);
     };
     loop();
+  }
+
+  // 暂停Live2D动画
+  public pause(): void{
+    this._run = false;
+  }
+
+  public isRunning(): boolean{
+    return this._run;
   }
 
   /**
@@ -306,12 +327,18 @@ export class LAppDelegate {
   // 调用motion
   // callback: (motion: ACubismMotion) => void
   public static startMotion(group: string, index: number, priority: number, callback?:any ): void{
-    LAppLive2DManager.getInstance().startMotion(group, index, priority, callback);
+    let instance = LAppDelegate.getInstance();
+    if(instance && instance.isRunning()){
+      LAppLive2DManager.getInstance().startMotion(group, index, priority, callback);
+    }
   }
 
   // 调用expression
   public static startExpression(expression: string): void{
-    LAppLive2DManager.getInstance().startExpression(expression);
+    let instance = LAppDelegate.getInstance();
+    if(instance && instance.isRunning()){
+      LAppLive2DManager.getInstance().startExpression(expression);
+    }
   }
 
   // 设定点击区域名称和对应回调函数
@@ -348,6 +375,8 @@ export class LAppDelegate {
     this._view = new LAppView();
     this._textureManager = new LAppTextureManager();
 
+    this._run = false;
+
     this.canvasHalfWidth = 0;
     this.canvasHalfHeight = 0;
   }
@@ -379,6 +408,8 @@ export class LAppDelegate {
   _mouseY: number; // マウスY座標
   _isEnd: boolean; // APP終了しているか
   _textureManager: LAppTextureManager; // テクスチャマネージャー
+
+  _run: boolean; // 更新/暂停Live2D动画
 
   // 一些初始化后不变的缓存值
   // 画布半长和半宽以及位置
@@ -528,6 +559,5 @@ function onTouchCancel(e: TouchEvent): void {
   LAppDelegate.getInstance()._view.onTouchesEnded(posX, posY);
 }
 
-(<any>window).live2D = LAppDelegate;
 
 
